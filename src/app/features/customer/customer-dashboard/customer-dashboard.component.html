@@ -1,0 +1,901 @@
+<!-- CUSTOMER DASHBOARD SHELL -->
+<div class="dash-layout">
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <!-- Brand Logo -->
+    <div class="topbar-left">
+      <a routerLink="/customer/dashboard" class="brand-link">
+        <div class="brand-logo-badge">
+          <!-- Blue Shield with Heartbeat pulse line -->
+          <svg width="34" height="34" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 3L6 8.5V18C6 27.5 12 34.5 20 37C28 34.5 34 27.5 34 18V8.5L20 3Z" fill="#2563eb"/>
+            <path d="M12 20H15.5L17.5 15L21 24L23.5 18.5L25.5 20H28" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="brand-info">
+          <span class="brand-name">E-Insurance</span>
+          <span class="brand-tagline">Secure Today, Safer Tomorrow</span>
+        </div>
+      </a>
+    </div>
+
+    <!-- Search Input -->
+    <div class="topbar-search">
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass search-ico"></i>
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          (input)="filterPolicies()"
+          placeholder="Search for policies, claims, or help..."
+          class="search-input"
+        />
+        <button *ngIf="searchQuery" (click)="clearSearch()" class="search-clear-btn" title="Clear">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Topbar Actions -->
+    <div class="topbar-right">
+      <!-- Notification Bell -->
+      <div class="bell-trigger" (click)="toggleNotifications()" title="Notifications">
+        <i class="fa-regular fa-bell bell-icon"></i>
+        <span class="bell-badge">3</span>
+
+        <!-- Notification Popover -->
+        <div class="notifications-dropdown" *ngIf="showNotifications()" (click)="$event.stopPropagation()">
+          <div class="dropdown-head">
+            <h6>Notifications</h6>
+            <span class="badge-count">3 Unread</span>
+          </div>
+          <div class="dropdown-list">
+            <div class="notif-item unread">
+              <div class="notif-dot green"></div>
+              <div class="notif-content">
+                <p>Payment of <strong>₹5,000</strong> confirmed for POL12345.</p>
+                <span class="notif-time">12 Sep 2026, 10:30 AM</span>
+              </div>
+            </div>
+            <div class="notif-item unread">
+              <div class="notif-dot purple"></div>
+              <div class="notif-content">
+                <p>Claim request <strong>#CLM-9102</strong> received and in review.</p>
+                <span class="notif-time">10 Sep 2026, 02:15 PM</span>
+              </div>
+            </div>
+            <div class="notif-item unread">
+              <div class="notif-dot blue"></div>
+              <div class="notif-content">
+                <p>Vehicle policy renewal reminder for <strong>POL67890</strong>.</p>
+                <span class="notif-time">05 Sep 2026, 11:20 AM</span>
+              </div>
+            </div>
+          </div>
+          <div class="dropdown-foot">
+            <button class="btn-link-sm" (click)="closePopovers()">Mark all as read</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- User Profile Dropdown -->
+      <div class="user-trigger" (click)="toggleUserDropdown()">
+        <div class="user-avatar-circle">M</div>
+        <span class="user-name">{{ customerName() }}</span>
+        <i class="fa-solid fa-chevron-down chevron-icon"></i>
+
+        <!-- User Dropdown Menu -->
+        <div class="user-menu-dropdown" *ngIf="showUserDropdown()" (click)="$event.stopPropagation()">
+          <div class="user-menu-header">
+            <div class="user-avatar-circle md">M</div>
+            <div>
+              <div class="user-full-name">{{ customerName() }}</div>
+              <div class="user-email-text">muskan@einsurance.com</div>
+              <span class="user-role-badge">Verified Customer</span>
+            </div>
+          </div>
+          <div class="user-menu-divider"></div>
+
+          <!-- Quick Persona Switcher -->
+          <div class="role-switch-section">
+            <div class="switch-label">Switch Workspace Role:</div>
+            <div class="role-chips">
+              <button
+                class="role-chip"
+                [class.active]="authService.userRole() === 'CUSTOMER'"
+                (click)="switchRole('CUSTOMER')">
+                Customer
+              </button>
+              <button
+                class="role-chip"
+                [class.active]="authService.userRole() === 'ADMIN'"
+                (click)="switchRole('ADMIN')">
+                Admin
+              </button>
+              <button
+                class="role-chip"
+                [class.active]="authService.userRole() === 'AGENT'"
+                (click)="switchRole('AGENT')">
+                Agent
+              </button>
+              <button
+                class="role-chip"
+                [class.active]="authService.userRole() === 'EMPLOYEE'"
+                (click)="switchRole('EMPLOYEE')">
+                Employee
+              </button>
+            </div>
+          </div>
+          <div class="user-menu-divider"></div>
+
+          <button class="user-menu-item" (click)="openProfileModal(); closePopovers()">
+            <i class="fa-regular fa-user"></i> My Profile
+          </button>
+          <button class="user-menu-item" (click)="openSupportModal(); closePopovers()">
+            <i class="fa-solid fa-headset"></i> Help & Support
+          </button>
+          <div class="user-menu-divider"></div>
+          <button class="user-menu-item logout" (click)="logout()">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- BODY CONTAINER: SIDEBAR + MAIN CONTENT -->
+  <div class="dash-body">
+    <!-- LEFT SIDEBAR -->
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <a routerLink="/customer/dashboard" class="nav-item active">
+          <i class="fa-solid fa-house"></i>
+          <span>Dashboard</span>
+        </a>
+        <a routerLink="/customer/my-policies" class="nav-item">
+          <i class="fa-regular fa-file-lines"></i>
+          <span>My Policies</span>
+        </a>
+        <a routerLink="/customer/buy-policy" class="nav-item">
+          <i class="fa-solid fa-shield-halved"></i>
+          <span>Buy Policy</span>
+        </a>
+        <button class="nav-item btn-nav" (click)="openClaimModal()">
+          <i class="fa-regular fa-clipboard"></i>
+          <span>Claims</span>
+        </button>
+        <a routerLink="/customer/payments" class="nav-item">
+          <i class="fa-regular fa-credit-card"></i>
+          <span>Payments</span>
+        </a>
+        <button class="nav-item btn-nav" (click)="openDocumentsModal()">
+          <i class="fa-regular fa-folder-closed"></i>
+          <span>Documents</span>
+        </button>
+        <button class="nav-item btn-nav" (click)="openProfileModal()">
+          <i class="fa-regular fa-user"></i>
+          <span>Profile</span>
+        </button>
+        <button class="nav-item btn-nav" (click)="openSupportModal()">
+          <i class="fa-solid fa-headset"></i>
+          <span>Support</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="nav-item logout-item btn-nav" (click)="logout()">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN DASHBOARD CONTENT -->
+    <main class="dash-main">
+      <!-- 1. HERO BANNER -->
+      <section class="hero-card">
+        <div class="hero-left">
+          <h1 class="hero-welcome">
+            Welcome back, <span class="brand-highlight">{{ customerName() }}!</span>
+          </h1>
+          <p class="hero-subtext">Your security is our priority.</p>
+          <p class="hero-quote">"Protect today for a brighter tomorrow."</p>
+
+          <a routerLink="/customer/buy-policy" class="btn-explore-plans">
+            <span>Explore Plans</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </a>
+        </div>
+
+        <div class="hero-right">
+          <!-- FAMILY & SHIELD VECTOR ILLUSTRATION -->
+          <div class="family-illustration-wrap">
+            <svg width="290" height="180" viewBox="0 0 320 200" fill="none" xmlns="http://www.w3.org/2000/svg" class="hero-svg">
+              <defs>
+                <linearGradient id="shieldGrad" x1="160" y1="10" x2="160" y2="190" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#3b82f6" />
+                  <stop offset="1" stop-color="#1d4ed8" />
+                </linearGradient>
+                <linearGradient id="leafGrad" x1="0" y1="0" x2="1" y2="1">
+                  <stop stop-color="#93c5fd" stop-opacity="0.6"/>
+                  <stop offset="1" stop-color="#3b82f6" stop-opacity="0.2"/>
+                </linearGradient>
+              </defs>
+
+              <!-- Soft Foliage / Leaves in background -->
+              <path d="M40 180C30 140 70 120 90 140C110 160 80 190 40 180Z" fill="url(#leafGrad)"/>
+              <path d="M280 180C290 140 250 120 230 140C210 160 240 190 280 180Z" fill="url(#leafGrad)"/>
+              <path d="M260 110C280 80 310 95 300 120C290 140 265 130 260 110Z" fill="url(#leafGrad)"/>
+              <path d="M60 110C40 80 10 95 20 120C30 140 55 130 60 110Z" fill="url(#leafGrad)"/>
+
+              <!-- Large Security Shield in Center -->
+              <path d="M215 45L255 60V105C255 140 230 168 215 178C200 168 175 140 175 105V60L215 45Z" fill="url(#shieldGrad)" />
+              <path d="M200 110L210 120L230 98" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+
+              <!-- Father (Left) -->
+              <g id="father">
+                <circle cx="120" cy="70" r="19" fill="#fbcfe8" />
+                <!-- Hair -->
+                <path d="M103 66C103 52 112 47 124 47C136 47 141 53 141 62C133 60 127 63 124 67C118 64 110 65 103 66Z" fill="#1e293b" />
+                <!-- Eyes & smile -->
+                <circle cx="116" cy="70" r="2" fill="#334155" />
+                <circle cx="126" cy="70" r="2" fill="#334155" />
+                <path d="M118 76Q121 79 124 76" stroke="#e11d48" stroke-width="1.5" stroke-linecap="round" fill="none" />
+                <!-- Body / Shirt Navy -->
+                <path d="M100 93C98 120 95 190 95 190H145C145 190 142 120 140 93C133 89 107 89 100 93Z" fill="#1e3a8a" />
+              </g>
+
+              <!-- Mother (Right) -->
+              <g id="mother">
+                <circle cx="168" cy="80" r="18" fill="#fed7aa" />
+                <!-- Hair long -->
+                <path d="M150 78C150 60 162 56 172 56C184 56 189 63 189 78C189 95 186 115 182 118C180 100 178 95 174 95C170 95 168 100 166 118C158 112 150 95 150 78Z" fill="#0f172a" />
+                <!-- Eyes & smile -->
+                <circle cx="164" cy="80" r="2" fill="#334155" />
+                <circle cx="174" cy="80" r="2" fill="#334155" />
+                <path d="M166 86Q169 89 172 86" stroke="#e11d48" stroke-width="1.5" stroke-linecap="round" fill="none" />
+                <!-- Body / Dress Coral/Pink -->
+                <path d="M148 102C146 130 142 190 142 190H194C194 190 190 130 188 102C180 98 156 98 148 102Z" fill="#f43f5e" />
+              </g>
+
+              <!-- Child (Front Center) -->
+              <g id="daughter">
+                <circle cx="145" cy="120" r="14" fill="#fde68a" />
+                <!-- Hair pigtails -->
+                <path d="M132 117C132 106 142 103 148 103C156 103 160 108 160 117C154 115 150 117 148 120C144 117 138 117 132 117Z" fill="#475569" />
+                <circle cx="129" cy="122" r="4" fill="#475569" />
+                <circle cx="162" cy="122" r="4" fill="#475569" />
+                <!-- Face -->
+                <circle cx="142" cy="121" r="1.5" fill="#334155" />
+                <circle cx="149" cy="121" r="1.5" fill="#334155" />
+                <path d="M143 126Q145 129 148 126" stroke="#e11d48" stroke-width="1.2" stroke-linecap="round" fill="none" />
+                <!-- Child Body Blue Tee -->
+                <path d="M130 138C128 155 126 190 126 190H164C164 190 162 155 160 138C154 135 136 135 130 138Z" fill="#38bdf8" />
+              </g>
+            </svg>
+          </div>
+
+          <!-- Handwritten Slogan Note -->
+          <div class="hero-slogan-note">
+            <span>A Safer Tomorrow for You and Your Loved Ones</span>
+            <svg class="slogan-swirl" width="80" height="12" viewBox="0 0 80 12" fill="none">
+              <path d="M2 9C24 2 56 1 78 7" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. FOUR METRIC / STAT CARDS -->
+      <section class="stats-grid">
+        <!-- Card 1: Active Policies -->
+        <div class="stat-card">
+          <div class="stat-top">
+            <div class="stat-icon-box green">
+              <i class="fa-solid fa-file-lines"></i>
+            </div>
+            <div class="stat-data">
+              <div class="stat-num">{{ activePoliciesCount() }}</div>
+              <div class="stat-name">Active Policies</div>
+            </div>
+          </div>
+          <div class="stat-bottom">
+            <a routerLink="/customer/my-policies" class="stat-link">
+              <span>View Details</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- Card 2: Pending Claim -->
+        <div class="stat-card">
+          <div class="stat-top">
+            <div class="stat-icon-box amber">
+              <i class="fa-regular fa-clock"></i>
+            </div>
+            <div class="stat-data">
+              <div class="stat-num">{{ pendingClaimsCount() }}</div>
+              <div class="stat-name">Pending Claim</div>
+            </div>
+          </div>
+          <div class="stat-bottom">
+            <button class="stat-link btn-text" (click)="openClaimModal()">
+              <span>View Details</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Card 3: Total Premium Paid -->
+        <div class="stat-card">
+          <div class="stat-top">
+            <div class="stat-icon-box purple">
+              <i class="fa-regular fa-credit-card"></i>
+            </div>
+            <div class="stat-data">
+              <div class="stat-num">₹{{ totalPremiumPaid() | number }}</div>
+              <div class="stat-name">Total Premium Paid</div>
+            </div>
+          </div>
+          <div class="stat-bottom">
+            <a routerLink="/customer/payments" class="stat-link">
+              <span>View Details</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- Card 4: Upcoming Payments -->
+        <div class="stat-card">
+          <div class="stat-top">
+            <div class="stat-icon-box blue">
+              <i class="fa-regular fa-calendar-days"></i>
+            </div>
+            <div class="stat-data">
+              <div class="stat-num">0</div>
+              <div class="stat-name">Upcoming Payments</div>
+            </div>
+          </div>
+          <div class="stat-bottom">
+            <a routerLink="/customer/payments" class="stat-link">
+              <span>View Details</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. MIDDLE ROW: MY POLICIES TABLE + QUICK ACTIONS -->
+      <section class="middle-grid">
+        <!-- My Policies Card -->
+        <div class="card-panel policies-panel">
+          <div class="panel-header">
+            <h2 class="panel-title">My Policies</h2>
+            <a routerLink="/customer/my-policies" class="link-view-all">View All</a>
+          </div>
+
+          <div class="table-container">
+            <table class="dashboard-table">
+              <thead>
+                <tr>
+                  <th>Policy No.</th>
+                  <th>Plan Type</th>
+                  <th>Start Date</th>
+                  <th>End Date</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let p of displayedPolicies()">
+                  <td class="policy-no-cell">POL{{ p.policyId }}</td>
+                  <td class="policy-type-cell">
+                    {{ getPlanTypeName(p) }}
+                  </td>
+                  <td class="date-cell">{{ formatDate(p.dateIssued) }}</td>
+                  <td class="date-cell">{{ formatDate(p.policyLapseDate) }}</td>
+                  <td>
+                    <span
+                      class="pill-badge"
+                      [ngClass]="{
+                        'badge-active': p.status === 'Active',
+                        'badge-pending': p.status === 'Pending',
+                        'badge-lapsed': p.status === 'Lapsed'
+                      }">
+                      {{ p.status }}
+                    </span>
+                  </td>
+                  <td>
+                    <button class="btn-action-view" (click)="viewPolicy(p)">View</button>
+                  </td>
+                </tr>
+
+                <tr *ngIf="displayedPolicies().length === 0">
+                  <td colspan="6" class="empty-table-cell">
+                    No matching policies found.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Quick Actions Card -->
+        <div class="card-panel quick-actions-panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Quick Actions</h2>
+          </div>
+
+          <div class="quick-actions-grid">
+            <!-- Action 1: Buy a New Policy -->
+            <a routerLink="/customer/buy-policy" class="action-tile tile-blue">
+              <div class="action-icon blue">
+                <i class="fa-solid fa-shield-halved"></i>
+              </div>
+              <span class="action-label">Buy a New Policy</span>
+            </a>
+
+            <!-- Action 2: File a Claim -->
+            <button class="action-tile tile-green" (click)="openClaimModal()">
+              <div class="action-icon green">
+                <i class="fa-regular fa-file-lines"></i>
+              </div>
+              <span class="action-label">File a Claim</span>
+            </button>
+
+            <!-- Action 3: Make a Payment -->
+            <a routerLink="/customer/payments" class="action-tile tile-amber">
+              <div class="action-icon amber">
+                <i class="fa-regular fa-credit-card"></i>
+              </div>
+              <span class="action-label">Make a Payment</span>
+            </a>
+
+            <!-- Action 4: Contact Support -->
+            <button class="action-tile tile-purple" (click)="openSupportModal()">
+              <div class="action-icon purple">
+                <i class="fa-solid fa-headset"></i>
+              </div>
+              <span class="action-label">Contact Support</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. BOTTOM ROW: RECENT ACTIVITIES + NEED HELP + PROMO CARD -->
+      <section class="bottom-grid">
+        <!-- Recent Activities Card -->
+        <div class="card-panel activities-panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Recent Activities</h2>
+            <a routerLink="/customer/payments" class="link-view-all">View All</a>
+          </div>
+
+          <div class="activities-list">
+            <div class="activity-item" *ngFor="let item of recentActivities">
+              <div class="activity-circle" [ngClass]="item.colorClass">
+                <i [class]="item.icon"></i>
+              </div>
+              <div class="activity-info">
+                <div class="activity-text">{{ item.title }}</div>
+                <div class="activity-date">{{ item.timestamp }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Need Help? Card -->
+        <div class="card-panel need-help-panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Need Help?</h2>
+          </div>
+
+          <div class="need-help-body">
+            <!-- Support Specialist SVG Illustration -->
+            <div class="help-illustration">
+              <svg width="120" height="85" viewBox="0 0 160 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Background soft circle aura -->
+                <circle cx="80" cy="55" r="45" fill="#e0f2fe" />
+
+                <!-- Desk bar -->
+                <rect x="25" y="85" width="110" height="6" rx="3" fill="#cbd5e1"/>
+
+                <!-- Headset Agent Woman -->
+                <circle cx="80" cy="40" r="16" fill="#fed7aa"/>
+                <!-- Hair -->
+                <path d="M64 36C64 22 74 18 84 18C94 18 97 24 97 36C97 45 94 48 94 50C90 46 86 46 80 46C74 46 70 46 66 50C66 48 64 45 64 36Z" fill="#1e293b"/>
+                <!-- Headset band & earpiece -->
+                <path d="M63 36C63 24 71 16 80 16C89 16 97 24 97 36" stroke="#475569" stroke-width="3" stroke-linecap="round" fill="none"/>
+                <rect x="61" y="33" width="5" height="10" rx="2.5" fill="#1e3a8a"/>
+                <rect x="94" y="33" width="5" height="10" rx="2.5" fill="#1e3a8a"/>
+                <!-- Microphone -->
+                <path d="M64 41C64 47 70 49 76 48" stroke="#1e3a8a" stroke-width="2" stroke-linecap="round" fill="none"/>
+                <circle cx="77" cy="48" r="2.5" fill="#2563eb"/>
+
+                <!-- Eyes & smile -->
+                <circle cx="76" cy="40" r="1.5" fill="#334155"/>
+                <circle cx="84" cy="40" r="1.5" fill="#334155"/>
+                <path d="M78 46Q80 49 82 46" stroke="#e11d48" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+
+                <!-- Agent Shirt -->
+                <path d="M62 60C62 78 58 85 58 85H102C102 85 98 78 98 60C92 56 68 56 62 60Z" fill="#2563eb"/>
+                <path d="M76 56L80 64L84 56Z" fill="#ffffff"/>
+
+                <!-- Navy Laptop on Desk -->
+                <rect x="62" y="70" width="36" height="20" rx="2" fill="#1e293b"/>
+                <polygon points="56,88 104,88 100,85 60,85" fill="#475569"/>
+                <!-- Logo on laptop -->
+                <circle cx="80" cy="80" r="3" fill="#60a5fa"/>
+              </svg>
+            </div>
+
+            <h3 class="help-heading">We're here for you!</h3>
+            <p class="help-subtext">
+              Get quick support for your queries related to policies, claims, and more.
+            </p>
+
+            <button class="btn-help-contact" (click)="openSupportModal()">
+              Contact Support
+            </button>
+          </div>
+        </div>
+
+        <!-- Promo Banner Card: Because Every Step Matters -->
+        <div class="card-panel promo-banner-panel">
+          <!-- Sky and Rain and Umbrella Art -->
+          <div class="promo-bg-art">
+            <svg width="100%" height="100%" viewBox="0 0 280 200" fill="none" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="skyGrad" x1="140" y1="0" x2="140" y2="200" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#bae6fd" />
+                  <stop offset="0.6" stop-color="#e0f2fe" />
+                  <stop offset="1" stop-color="#f0fdf4" />
+                </linearGradient>
+              </defs>
+              <rect width="280" height="200" rx="14" fill="url(#skyGrad)" />
+
+              <!-- Gentle Rain Drops outside -->
+              <line x1="20" y1="20" x2="15" y2="35" stroke="#93c5fd" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="45" y1="40" x2="40" y2="55" stroke="#93c5fd" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="30" y1="70" x2="25" y2="85" stroke="#93c5fd" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="260" y1="25" x2="255" y2="40" stroke="#93c5fd" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="240" y1="60" x2="235" y2="75" stroke="#93c5fd" stroke-width="1.5" stroke-linecap="round"/>
+
+              <!-- Large Protective Blue Umbrella Canopy -->
+              <path d="M40 100C40 45 140 30 140 30C140 30 240 45 240 100C215 95 190 95 170 100C150 95 130 95 110 100C90 95 65 95 40 100Z" fill="#1e3a8a" />
+              <!-- Umbrella Shaft -->
+              <line x1="140" y1="30" x2="140" y2="150" stroke="#0f172a" stroke-width="3" stroke-linecap="round"/>
+              <path d="M140 150C140 156 134 160 128 156" stroke="#0f172a" stroke-width="3" stroke-linecap="round" fill="none"/>
+
+              <!-- Sheltered Under Umbrella: House + Car + Walking Family -->
+              <!-- Cozy House -->
+              <polygon points="50,135 75,115 100,135" fill="#3b82f6" />
+              <rect x="55" y="135" width="40" height="30" fill="#ffffff" stroke="#94a3b8" stroke-width="1" />
+              <rect x="70" y="147" width="10" height="18" fill="#1e3a8a" />
+              <rect x="60" y="140" width="7" height="7" fill="#fbbf24" />
+
+              <!-- Blue Car -->
+              <path d="M102 155L108 145H124L130 155H138C140 155 142 157 142 159V164H98V159C98 157 100 155 102 155Z" fill="#2563eb" />
+              <circle cx="106" cy="164" r="4.5" fill="#0f172a" />
+              <circle cx="132" cy="164" r="4.5" fill="#0f172a" />
+              <rect x="110" y="147" width="12" height="6" fill="#bfdbfe" />
+
+              <!-- Family Walking Silhouettes -->
+              <circle cx="70" cy="178" r="3.5" fill="#1e293b"/>
+              <path d="M68 182H72V195H68Z" fill="#1e293b"/>
+              <circle cx="78" cy="180" r="3" fill="#1e293b"/>
+              <path d="M76 184H80V195H76Z" fill="#1e293b"/>
+              <circle cx="84" cy="185" r="2.5" fill="#1e293b"/>
+              <path d="M83 188H85V195H83Z" fill="#1e293b"/>
+            </svg>
+          </div>
+
+          <!-- Promo Content -->
+          <div class="promo-text-wrap">
+            <h3 class="promo-headline">Because<br/>Every Step<br/>Matters</h3>
+            <p class="promo-tag">Insurance for a<br/>Brighter Tomorrow</p>
+            <a routerLink="/customer/buy-policy" class="btn-promo-action">
+              <span>Explore Plans</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- 1. VIEW POLICY DETAILS MODAL -->
+  <div class="modal-backdrop" *ngIf="selectedPolicyModal()" (click)="closeModals()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <div class="modal-title-wrap">
+          <i class="fa-solid fa-file-contract modal-head-icon"></i>
+          <div>
+            <h3>Policy Details #POL{{ selectedPolicyModal()?.policyId }}</h3>
+            <span class="modal-sub">{{ getPlanTypeName(selectedPolicyModal()) }}</span>
+          </div>
+        </div>
+        <button class="modal-close-btn" (click)="closeModals()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="modal-body" *ngIf="selectedPolicyModal() as p">
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="detail-lbl">Policy Number</span>
+            <span class="detail-val font-bold">POL{{ p.policyId }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-lbl">Status</span>
+            <span class="pill-badge" [ngClass]="p.status === 'Active' ? 'badge-active' : 'badge-pending'">
+              {{ p.status }}
+            </span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-lbl">Sum Assured</span>
+            <span class="detail-val font-bold text-success">₹{{ (p.sumAssured || 1000000) | number }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-lbl">Annual Premium</span>
+            <span class="detail-val font-bold text-primary">₹{{ p.premium | number }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-lbl">Start Date</span>
+            <span class="detail-val">{{ formatDate(p.dateIssued) }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-lbl">Maturity / End Date</span>
+            <span class="detail-val">{{ formatDate(p.policyLapseDate) }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-lbl">Policy Tenure</span>
+            <span class="detail-val">{{ p.maturityPeriod }} Year(s)</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-lbl">Nominee Details</span>
+            <span class="detail-val">{{ p.nomineeName || 'Aarav Verma' }} ({{ p.nomineeRelation || 'Spouse' }})</span>
+          </div>
+        </div>
+
+        <div class="detail-notes">
+          <h6>Coverage Overview</h6>
+          <p>{{ p.policyDetails }}</p>
+        </div>
+      </div>
+
+      <div class="modal-foot">
+        <button class="btn btn-secondary" (click)="closeModals()">Close</button>
+        <button class="btn btn-outline" (click)="downloadCertificate()">
+          <i class="fa-solid fa-download"></i> Download Policy Bond
+        </button>
+        <a routerLink="/customer/payments" class="btn btn-primary" (click)="closeModals()">
+          <i class="fa-solid fa-credit-card"></i> Pay Premium
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. FILE A CLAIM MODAL -->
+  <div class="modal-backdrop" *ngIf="showClaimModal()" (click)="closeModals()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <div class="modal-title-wrap">
+          <i class="fa-solid fa-shield-virus modal-head-icon text-green"></i>
+          <div>
+            <h3>File an Insurance Claim</h3>
+            <span class="modal-sub">Quick online settlement assistance</span>
+          </div>
+        </div>
+        <button class="modal-close-btn" (click)="closeModals()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-row">
+          <label class="form-label">Select Policy *</label>
+          <select class="form-control" [(ngModel)]="claimForm.policyId">
+            <option *ngFor="let p of myPolicies()" [value]="p.policyId">
+              POL{{ p.policyId }} - {{ getPlanTypeName(p) }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <label class="form-label">Claim Type *</label>
+          <select class="form-control" [(ngModel)]="claimForm.type">
+            <option value="Health / Hospitalization">Health / Hospitalization Cashless</option>
+            <option value="Accidental Damage / Vehicle">Accidental Damage / Vehicle Collision</option>
+            <option value="Theft / Total Loss">Theft / Total Loss</option>
+            <option value="Critical Illness Reimbursement">Critical Illness Reimbursement</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <label class="form-label">Claim Amount (₹) *</label>
+          <input type="number" class="form-control" [(ngModel)]="claimForm.amount" placeholder="e.g. 25000" />
+        </div>
+
+        <div class="form-row">
+          <label class="form-label">Incident / Diagnosis Details *</label>
+          <textarea
+            class="form-control"
+            rows="3"
+            [(ngModel)]="claimForm.description"
+            placeholder="Briefly describe the incident, hospital or service center details..."></textarea>
+        </div>
+
+        <div class="form-row">
+          <label class="form-label">Upload Bills / Medical Records (Optional)</label>
+          <div class="file-upload-box">
+            <i class="fa-solid fa-cloud-arrow-up file-icon"></i>
+            <span>Drop medical bills, repair estimates or FIR documents here</span>
+            <small class="text-muted">PDF, PNG, JPG up to 10MB</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-foot">
+        <button class="btn btn-secondary" (click)="closeModals()">Cancel</button>
+        <button class="btn btn-success" (click)="submitClaim()">
+          <i class="fa-solid fa-paper-plane"></i> Submit Claim
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. CONTACT SUPPORT MODAL -->
+  <div class="modal-backdrop" *ngIf="showSupportModal()" (click)="closeModals()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <div class="modal-title-wrap">
+          <i class="fa-solid fa-headset modal-head-icon text-purple"></i>
+          <div>
+            <h3>Customer Care & Support</h3>
+            <span class="modal-sub">We're here 24x7 to assist you</span>
+          </div>
+        </div>
+        <button class="modal-close-btn" (click)="closeModals()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="support-contact-cards">
+          <div class="contact-card">
+            <i class="fa-solid fa-phone phone-ico"></i>
+            <div>
+              <strong>Toll-Free Helpline</strong>
+              <div>1800-266-7788 (Toll Free)</div>
+            </div>
+          </div>
+          <div class="contact-card">
+            <i class="fa-solid fa-envelope mail-ico"></i>
+            <div>
+              <strong>Support Email</strong>
+              <div>support&#64;einsurance.com</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row" style="margin-top: 1rem;">
+          <label class="form-label">Subject / Query Topic</label>
+          <select class="form-control" [(ngModel)]="supportForm.topic">
+            <option value="Policy Question">Policy Issuance or Renewal Question</option>
+            <option value="Claim Assistance">Claim Status Follow-up</option>
+            <option value="Premium Payment">Payment / Receipt Issue</option>
+            <option value="General Query">General Inquiry</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <label class="form-label">Your Message</label>
+          <textarea
+            class="form-control"
+            rows="4"
+            [(ngModel)]="supportForm.message"
+            placeholder="Type your message here..."></textarea>
+        </div>
+      </div>
+
+      <div class="modal-foot">
+        <button class="btn btn-secondary" (click)="closeModals()">Cancel</button>
+        <button class="btn btn-primary" (click)="sendSupportMessage()">
+          <i class="fa-solid fa-paper-plane"></i> Send Query
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. DOCUMENTS MODAL -->
+  <div class="modal-backdrop" *ngIf="showDocumentsModal()" (click)="closeModals()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <div class="modal-title-wrap">
+          <i class="fa-regular fa-folder-open modal-head-icon text-primary"></i>
+          <div>
+            <h3>Policy Documents & Bonds</h3>
+            <span class="modal-sub">Download your digital certificates anytime</span>
+          </div>
+        </div>
+        <button class="modal-close-btn" (click)="closeModals()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="doc-list">
+          <div class="doc-item" *ngFor="let p of myPolicies()">
+            <div class="doc-left">
+              <i class="fa-solid fa-file-pdf pdf-ico"></i>
+              <div>
+                <strong>POL{{ p.policyId }} - Policy Bond</strong>
+                <div class="doc-sub">{{ getPlanTypeName(p) }} | Valid till {{ formatDate(p.policyLapseDate) }}</div>
+              </div>
+            </div>
+            <button class="btn btn-sm btn-outline" (click)="downloadCertificate()">
+              <i class="fa-solid fa-download"></i> PDF
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-foot">
+        <button class="btn btn-secondary" (click)="closeModals()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. PROFILE MODAL -->
+  <div class="modal-backdrop" *ngIf="showProfileModal()" (click)="closeModals()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <div class="modal-title-wrap">
+          <i class="fa-regular fa-user modal-head-icon text-primary"></i>
+          <div>
+            <h3>Customer Profile</h3>
+            <span class="modal-sub">Personal and account information</span>
+          </div>
+        </div>
+        <button class="modal-close-btn" (click)="closeModals()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="detail-lbl">Full Name</span>
+            <span class="detail-val font-bold">{{ customerName() }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-lbl">Customer ID</span>
+            <span class="detail-val font-bold">#CUST-{{ customerId() }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-lbl">Email Address</span>
+            <span class="detail-val">muskan&#64;einsurance.com</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-lbl">Phone Number</span>
+            <span class="detail-val">+91 99887 76655</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-lbl">Date of Birth</span>
+            <span class="detail-val">14 May 1996</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-lbl">Assigned Advisor</span>
+            <span class="detail-val">Suresh Patel (Agent #1)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-foot">
+        <button class="btn btn-secondary" (click)="closeModals()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

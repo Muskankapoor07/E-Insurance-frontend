@@ -1,0 +1,427 @@
+<!-- ADMIN DASHBOARD -->
+<div class="dash-layout">
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <a routerLink="/admin/dashboard" class="brand-link">
+        <div class="brand-logo-badge">
+          <!-- Umbrella Shield Icon -->
+          <svg width="34" height="34" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 3L6 8.5V18C6 27.5 12 34.5 20 37C28 34.5 34 27.5 34 18V8.5L20 3Z" fill="#2563eb"/>
+            <path d="M12 21C12 16 16 13 20 13C24 13 28 16 28 21H12Z" fill="white"/>
+            <line x1="20" y1="13" x2="20" y2="24" stroke="white" stroke-width="2" stroke-linecap="round"/>
+            <path d="M20 24C20 25.5 18.5 26.5 17 25.5" stroke="white" stroke-width="2" stroke-linecap="round" fill="none"/>
+          </svg>
+        </div>
+        <div class="brand-info">
+          <span class="brand-name">E-Insurance</span>
+          <span class="brand-tagline">Secure Today, Safer Tomorrow</span>
+        </div>
+      </a>
+    </div>
+
+    <div class="topbar-right">
+      <!-- Notification Bell -->
+      <div class="bell-trigger" (click)="toggleNotifications()" title="Notifications">
+        <i class="fa-regular fa-bell bell-icon"></i>
+        <span class="bell-badge">1</span>
+
+        <!-- Notification Popover -->
+        <div class="notifications-dropdown" *ngIf="showNotifications()" (click)="$event.stopPropagation()">
+          <div class="dropdown-head">
+            <h6>Admin Alerts</h6>
+            <span class="badge-count">1 Unread</span>
+          </div>
+          <div class="dropdown-list">
+            <div class="notif-item unread">
+              <div class="notif-dot blue"></div>
+              <div class="notif-content">
+                <p>Scheduled database snapshot and audit report completed.</p>
+                <span class="notif-time">Today, 09:00 AM</span>
+              </div>
+            </div>
+          </div>
+          <div class="dropdown-foot">
+            <button class="btn-link-sm" (click)="closePopovers()">Mark as read</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- User Profile Dropdown -->
+      <div class="user-trigger" (click)="toggleUserDropdown()">
+        <div class="user-avatar-circle admin-avatar">A</div>
+        <span class="user-name">Admin</span>
+        <i class="fa-solid fa-chevron-down chevron-icon"></i>
+
+        <div class="user-menu-dropdown" *ngIf="showUserDropdown()" (click)="$event.stopPropagation()">
+          <div class="user-menu-header">
+            <div class="user-avatar-circle admin-avatar md">A</div>
+            <div>
+              <div class="user-full-name">System Administrator</div>
+              <div class="user-email-text">admin&#64;einsurance.com</div>
+              <span class="user-role-badge">Super Admin</span>
+            </div>
+          </div>
+          <div class="user-menu-divider"></div>
+
+          <div class="role-switch-section">
+            <div class="switch-label">Switch Workspace Role:</div>
+            <div class="role-chips">
+              <button class="role-chip" (click)="switchRole('CUSTOMER')">Customer</button>
+              <button class="role-chip active" (click)="switchRole('ADMIN')">Admin</button>
+              <button class="role-chip" (click)="switchRole('AGENT')">Agent</button>
+              <button class="role-chip" (click)="switchRole('EMPLOYEE')">Employee</button>
+            </div>
+          </div>
+          <div class="user-menu-divider"></div>
+
+          <button class="user-menu-item" (click)="openProfileModal(); closePopovers()">
+            <i class="fa-regular fa-user"></i> Admin Profile
+          </button>
+          <button class="user-menu-item" (click)="openReportsModal(); closePopovers()">
+            <i class="fa-solid fa-chart-line"></i> System Logs & Audit
+          </button>
+          <div class="user-menu-divider"></div>
+          <button class="user-menu-item logout" (click)="logout()">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- BODY: SIDEBAR + MAIN -->
+  <div class="dash-body">
+    <!-- LEFT SIDEBAR -->
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <a routerLink="/admin/dashboard" class="nav-item active">
+          <i class="fa-solid fa-house"></i>
+          <span>Dashboard</span>
+        </a>
+        <a routerLink="/admin/manage-users" class="nav-item">
+          <i class="fa-solid fa-user-group"></i>
+          <span>Manage Users</span>
+        </a>
+        <a routerLink="/admin/customer-policies" class="nav-item">
+          <i class="fa-regular fa-file-lines"></i>
+          <span>Manage Policies</span>
+        </a>
+        <button class="nav-item btn-nav" (click)="openClaimsModal()">
+          <i class="fa-solid fa-shield-halved"></i>
+          <span>Claims</span>
+        </button>
+        <button class="nav-item btn-nav" (click)="openReportsModal()">
+          <i class="fa-solid fa-chart-simple"></i>
+          <span>Reports</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-bottom-section">
+        <button class="nav-item btn-nav" (click)="openProfileModal()">
+          <i class="fa-regular fa-user"></i>
+          <span>Profile</span>
+        </button>
+        <button class="nav-item logout-item btn-nav" (click)="logout()">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i>
+          <span>Logout</span>
+        </button>
+
+        <!-- Bottom Accent Card -->
+        <div class="sidebar-accent-card">
+          <div class="accent-art">
+            <svg width="100%" height="60" viewBox="0 0 180 60" fill="none" preserveAspectRatio="none">
+              <path d="M0 30C50 10 120 45 180 20V60H0V30Z" fill="#e0f2fe" opacity="0.7"/>
+              <path d="M0 45C60 25 110 50 180 35V60H0V45Z" fill="#bae6fd" opacity="0.5"/>
+            </svg>
+          </div>
+          <div class="accent-content">
+            <div class="accent-title">Admin Panel</div>
+            <div class="accent-sub">Manage. Monitor. Grow.</div>
+            <div class="accent-bar"></div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN DASHBOARD -->
+    <main class="dash-main">
+      <!-- 1. HERO HEADER -->
+      <section class="admin-hero-header">
+        <h1 class="hero-title">Welcome, Admin!</h1>
+        <p class="hero-subtitle">Manage users, policies and claims for a safer tomorrow.</p>
+      </section>
+
+      <!-- 2. FOUR STAT CARDS -->
+      <section class="stats-grid">
+        <!-- Card 1: Total Users -->
+        <div class="stat-card">
+          <div class="stat-icon-box blue">
+            <i class="fa-solid fa-user-group"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-num">24</span>
+            <span class="stat-label">Total Users</span>
+          </div>
+        </div>
+
+        <!-- Card 2: Active Policies -->
+        <div class="stat-card">
+          <div class="stat-icon-box green">
+            <i class="fa-solid fa-file-lines"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-num">18</span>
+            <span class="stat-label">Active Policies</span>
+          </div>
+        </div>
+
+        <!-- Card 3: Pending Claims -->
+        <div class="stat-card">
+          <div class="stat-icon-box amber">
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-num">6</span>
+            <span class="stat-label">Pending Claims</span>
+          </div>
+        </div>
+
+        <!-- Card 4: Agents -->
+        <div class="stat-card">
+          <div class="stat-icon-box purple">
+            <i class="fa-solid fa-user-tie"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-num">5</span>
+            <span class="stat-label">Agents</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. RECENT USERS TABLE -->
+      <section class="card-panel table-panel">
+        <div class="panel-header">
+          <h2 class="panel-title">Recent Users</h2>
+          <a routerLink="/admin/manage-users" class="link-view-all">View All</a>
+        </div>
+
+        <div class="table-container">
+          <table class="dashboard-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Joined Date</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let u of recentUsers; let i = index">
+                <td class="index-cell">{{ i + 1 }}</td>
+                <td class="name-cell">{{ u.name }}</td>
+                <td class="email-cell">{{ u.email }}</td>
+                <td class="role-cell">{{ u.role }}</td>
+                <td class="date-cell">{{ u.joinedDate }}</td>
+                <td>
+                  <span
+                    class="pill-badge"
+                    [ngClass]="u.status === 'Active' ? 'badge-active' : 'badge-inactive'">
+                    {{ u.status }}
+                  </span>
+                </td>
+                <td>
+                  <button class="btn-action-view" (click)="viewUserDetails(u)">View</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- DASHBOARD FOOTER -->
+      <footer class="dash-footer">
+        <span class="footer-copy">&copy; 2026 E-Insurance. All Rights Reserved.</span>
+        <span class="footer-tagline">Your Protection, Our Priority.</span>
+      </footer>
+    </main>
+  </div>
+
+  <!-- VIEW USER DETAILS MODAL -->
+  <div class="modal-backdrop" *ngIf="selectedUserModal()" (click)="closeModals()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <div class="modal-title-wrap">
+          <i class="fa-solid fa-user-shield modal-head-icon"></i>
+          <div>
+            <h3>User Profile: {{ selectedUserModal()?.name }}</h3>
+            <span class="modal-sub">Account Details & Authorization</span>
+          </div>
+        </div>
+        <button class="modal-close-btn" (click)="closeModals()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="modal-body" *ngIf="selectedUserModal() as u">
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="detail-lbl">Full Name</span>
+            <span class="detail-val font-bold">{{ u.name }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-lbl">Account Status</span>
+            <span class="pill-badge" [ngClass]="u.status === 'Active' ? 'badge-active' : 'badge-inactive'">
+              {{ u.status }}
+            </span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-lbl">Email Address</span>
+            <span class="detail-val">{{ u.email }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-lbl">System Role</span>
+            <span class="detail-val font-bold text-primary">{{ u.role }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-lbl">Joined Date</span>
+            <span class="detail-val">{{ u.joinedDate }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-lbl">Verification Status</span>
+            <span class="detail-val text-success font-bold">KYC Verified</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-foot">
+        <button class="btn btn-secondary" (click)="closeModals()">Close</button>
+        <button class="btn btn-outline" (click)="toggleUserStatus()">
+          Toggle Status
+        </button>
+        <a routerLink="/admin/manage-users" class="btn btn-primary" (click)="closeModals()">
+          Manage in Users Console
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLAIMS OVERVIEW MODAL -->
+  <div class="modal-backdrop" *ngIf="showClaimsModal()" (click)="closeModals()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <div class="modal-title-wrap">
+          <i class="fa-solid fa-shield-halved modal-head-icon text-amber"></i>
+          <div>
+            <h3>Claims Audit Queue</h3>
+            <span class="modal-sub">Pending customer claim verifications</span>
+          </div>
+        </div>
+        <button class="modal-close-btn" (click)="closeModals()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="claim-audit-list">
+          <div class="audit-item" *ngFor="let c of pendingClaims">
+            <div class="audit-left">
+              <strong>{{ c.claimId }} - {{ c.customer }}</strong>
+              <div class="audit-sub">{{ c.type }} | ₹{{ c.amount | number }}</div>
+            </div>
+            <button class="btn btn-sm btn-primary" (click)="approveClaim(c.claimId)">Approve</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-foot">
+        <button class="btn btn-secondary" (click)="closeModals()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- REPORTS MODAL -->
+  <div class="modal-backdrop" *ngIf="showReportsModal()" (click)="closeModals()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <div class="modal-title-wrap">
+          <i class="fa-solid fa-chart-line modal-head-icon text-primary"></i>
+          <div>
+            <h3>System Performance & Financials</h3>
+            <span class="modal-sub">Realtime operational analytics</span>
+          </div>
+        </div>
+        <button class="modal-close-btn" (click)="closeModals()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="report-stats">
+          <div class="report-row">
+            <span>Gross Premiums Collected:</span>
+            <strong>₹{{ insuranceService.totalPremiumsCollected() | number }}</strong>
+          </div>
+          <div class="report-row">
+            <span>Agent Commissions Disbursed:</span>
+            <strong>₹{{ insuranceService.totalCommissionsPaid() | number }}</strong>
+          </div>
+          <div class="report-row">
+            <span>Active Policies Ratio:</span>
+            <strong>92.4%</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-foot">
+        <button class="btn btn-secondary" (click)="closeModals()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN PROFILE MODAL -->
+  <div class="modal-backdrop" *ngIf="showProfileModal()" (click)="closeModals()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <div class="modal-title-wrap">
+          <i class="fa-regular fa-user modal-head-icon text-primary"></i>
+          <div>
+            <h3>Admin Profile</h3>
+            <span class="modal-sub">Root Administrator Credentials</span>
+          </div>
+        </div>
+        <button class="modal-close-btn" (click)="closeModals()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="detail-lbl">Admin User</span>
+            <span class="detail-val font-bold">Rajesh Sharma</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-lbl">System Level</span>
+            <span class="detail-val font-bold text-primary">Level 1 - Super Admin</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-lbl">Email</span>
+            <span class="detail-val">admin&#64;einsurance.com</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-lbl">Session Expires</span>
+            <span class="detail-val">24 Hours</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-foot">
+        <button class="btn btn-secondary" (click)="closeModals()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

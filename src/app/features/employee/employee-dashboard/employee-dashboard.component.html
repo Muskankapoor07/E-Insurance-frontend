@@ -1,0 +1,462 @@
+<!-- EMPLOYEE DASHBOARD -->
+<div class="dash-layout">
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <a routerLink="/employee/dashboard" class="brand-link">
+        <div class="brand-logo-badge">
+          <!-- Umbrella Shield Icon -->
+          <svg width="34" height="34" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 3L6 8.5V18C6 27.5 12 34.5 20 37C28 34.5 34 27.5 34 18V8.5L20 3Z" fill="#2563eb"/>
+            <path d="M12 21C12 16 16 13 20 13C24 13 28 16 28 21H12Z" fill="white"/>
+            <line x1="20" y1="13" x2="20" y2="24" stroke="white" stroke-width="2" stroke-linecap="round"/>
+            <path d="M20 24C20 25.5 18.5 26.5 17 25.5" stroke="white" stroke-width="2" stroke-linecap="round" fill="none"/>
+          </svg>
+        </div>
+        <div class="brand-info">
+          <span class="brand-name">E-Insurance</span>
+          <span class="brand-tagline">Secure Today, Safer Tomorrow</span>
+        </div>
+      </a>
+    </div>
+
+    <div class="topbar-right">
+      <!-- Notification Bell -->
+      <div class="bell-trigger" (click)="toggleNotifications()" title="Notifications">
+        <i class="fa-regular fa-bell bell-icon"></i>
+        <span class="bell-badge">2</span>
+
+        <!-- Notification Popover -->
+        <div class="notifications-dropdown" *ngIf="showNotifications()" (click)="$event.stopPropagation()">
+          <div class="dropdown-head">
+            <h6>Employee Queue</h6>
+            <span class="badge-count">2 Pending</span>
+          </div>
+          <div class="dropdown-list">
+            <div class="notif-item unread">
+              <div class="notif-dot amber"></div>
+              <div class="notif-content">
+                <p>New claim audit assigned: <strong>Priya Verma (#CLM-8910)</strong>.</p>
+                <span class="notif-time">13 Sep 2026, 09:30 AM</span>
+              </div>
+            </div>
+            <div class="notif-item unread">
+              <div class="notif-dot blue"></div>
+              <div class="notif-content">
+                <p>KYC documents uploaded by <strong>Rohan Sharma</strong> awaiting review.</p>
+                <span class="notif-time">12 Sep 2026, 02:15 PM</span>
+              </div>
+            </div>
+          </div>
+          <div class="dropdown-foot">
+            <button class="btn-link-sm" (click)="closePopovers()">Mark all as read</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- User Profile Dropdown -->
+      <div class="user-trigger" (click)="toggleUserDropdown()">
+        <div class="user-avatar-circle employee-avatar">E</div>
+        <span class="user-name">Employee</span>
+        <i class="fa-solid fa-chevron-down chevron-icon"></i>
+
+        <div class="user-menu-dropdown" *ngIf="showUserDropdown()" (click)="$event.stopPropagation()">
+          <div class="user-menu-header">
+            <div class="user-avatar-circle employee-avatar md">E</div>
+            <div>
+              <div class="user-full-name">Vikram Singh</div>
+              <div class="user-email-text">vikram.singh&#64;einsurance.com</div>
+              <span class="user-role-badge">Senior Operations Underwriter</span>
+            </div>
+          </div>
+          <div class="user-menu-divider"></div>
+
+          <div class="role-switch-section">
+            <div class="switch-label">Switch Workspace Role:</div>
+            <div class="role-chips">
+              <button class="role-chip" (click)="switchRole('CUSTOMER')">Customer</button>
+              <button class="role-chip" (click)="switchRole('ADMIN')">Admin</button>
+              <button class="role-chip" (click)="switchRole('AGENT')">Agent</button>
+              <button class="role-chip active" (click)="switchRole('EMPLOYEE')">Employee</button>
+            </div>
+          </div>
+          <div class="user-menu-divider"></div>
+
+          <button class="user-menu-item" (click)="openProfileModal(); closePopovers()">
+            <i class="fa-regular fa-user"></i> My Staff Profile
+          </button>
+          <button class="user-menu-item" (click)="openContactAdminModal(); closePopovers()">
+            <i class="fa-solid fa-headset"></i> Contact Supervisor
+          </button>
+          <div class="user-menu-divider"></div>
+          <button class="user-menu-item logout" (click)="logout()">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- BODY: SIDEBAR + MAIN -->
+  <div class="dash-body">
+    <!-- LEFT SIDEBAR -->
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <a routerLink="/employee/dashboard" class="nav-item active">
+          <i class="fa-solid fa-house"></i>
+          <span>Dashboard</span>
+        </a>
+        <button class="nav-item btn-nav" (click)="openTasksModal()">
+          <i class="fa-solid fa-clipboard-check"></i>
+          <span>My Tasks</span>
+        </button>
+        <a routerLink="/admin/customer-policies" class="nav-item">
+          <i class="fa-solid fa-user-group"></i>
+          <span>Customers</span>
+        </a>
+        <a routerLink="/admin/customer-policies" class="nav-item">
+          <i class="fa-regular fa-file-lines"></i>
+          <span>Policies</span>
+        </a>
+        <button class="nav-item btn-nav" (click)="openProcessClaimModal()">
+          <i class="fa-solid fa-shield-halved"></i>
+          <span>Claims</span>
+        </button>
+        <button class="nav-item btn-nav" (click)="openTasksModal()">
+          <i class="fa-solid fa-chart-simple"></i>
+          <span>Reports</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-bottom-section">
+        <button class="nav-item btn-nav" (click)="openProfileModal()">
+          <i class="fa-regular fa-user"></i>
+          <span>Profile</span>
+        </button>
+        <button class="nav-item logout-item btn-nav" (click)="logout()">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i>
+          <span>Logout</span>
+        </button>
+
+        <!-- Sidebar Bottom Wave Card -->
+        <div class="sidebar-wave-card">
+          <div class="wave-art">
+            <svg width="100%" height="70" viewBox="0 0 180 70" fill="none" preserveAspectRatio="none">
+              <path d="M0 40C60 10 120 50 180 25V70H0V40Z" fill="#e0f2fe" opacity="0.8"/>
+              <path d="M0 55C70 30 110 55 180 40V70H0V55Z" fill="#bae6fd" opacity="0.6"/>
+            </svg>
+          </div>
+          <div class="wave-content">
+            <div class="wave-title">Work Today<br/>for a Safer<br/>Tomorrow</div>
+            <div class="wave-bar"></div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN EMPLOYEE CONTENT -->
+    <main class="dash-main">
+      <!-- 1. HERO BANNER AREA -->
+      <section class="employee-hero-banner">
+        <div class="hero-left">
+          <h1 class="hero-title">Welcome, Employee!</h1>
+          <p class="hero-subtitle">Your work helps build a safer tomorrow.</p>
+        </div>
+
+        <div class="hero-right-card">
+          <div class="card-illustration">
+            <svg width="130" height="85" viewBox="0 0 150 95" fill="none">
+              <!-- Document Sheet -->
+              <rect x="25" y="15" width="55" height="70" rx="6" fill="#ffffff" stroke="#93c5fd" stroke-width="2"/>
+              <line x1="35" y1="30" x2="65" y2="30" stroke="#60a5fa" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="35" y1="40" x2="70" y2="40" stroke="#60a5fa" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="35" y1="50" x2="60" y2="50" stroke="#60a5fa" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="35" y1="60" x2="68" y2="60" stroke="#60a5fa" stroke-width="2.5" stroke-linecap="round"/>
+              <!-- Shield in foreground -->
+              <path d="M70 30L95 40V65C95 82 82 92 70 96C58 92 45 82 45 65V40L70 30Z" fill="#2563eb"/>
+              <path d="M60 62L67 69L80 54" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="card-caption">
+            <span class="caption-title">People.<br/>Policies.<br/><strong>A Safer Tomorrow.</strong></span>
+            <div class="caption-bar"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. FOUR STAT CARDS -->
+      <section class="stats-grid">
+        <!-- Card 1: Policies Processed -->
+        <div class="stat-card">
+          <div class="stat-icon-box blue">
+            <i class="fa-solid fa-file-contract"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-num">12</span>
+            <span class="stat-label">Policies Processed</span>
+          </div>
+        </div>
+
+        <!-- Card 2: Claims Handled -->
+        <div class="stat-card">
+          <div class="stat-icon-box green">
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-num">5</span>
+            <span class="stat-label">Claims Handled</span>
+          </div>
+        </div>
+
+        <!-- Card 3: Customer Queries -->
+        <div class="stat-card">
+          <div class="stat-icon-box amber">
+            <i class="fa-solid fa-user-group"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-num">8</span>
+            <span class="stat-label">Customer Queries</span>
+          </div>
+        </div>
+
+        <!-- Card 4: Pending Tasks -->
+        <div class="stat-card">
+          <div class="stat-icon-box purple">
+            <i class="fa-regular fa-clock"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-num">3</span>
+            <span class="stat-label">Pending Tasks</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. MIDDLE ROW: MY TASKS + QUICK ACTIONS -->
+      <section class="middle-grid">
+        <!-- My Tasks Card -->
+        <div class="card-panel table-panel">
+          <div class="panel-header">
+            <h2 class="panel-title">My Tasks</h2>
+            <a class="link-view-all" (click)="openTasksModal()">View All</a>
+          </div>
+
+          <div class="table-container">
+            <table class="dashboard-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Task</th>
+                  <th>Customer Name</th>
+                  <th>Due Date</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let t of myTasks; let i = index">
+                  <td class="index-cell">{{ i + 1 }}</td>
+                  <td class="name-cell">{{ t.task }}</td>
+                  <td class="cust-cell">{{ t.customerName }}</td>
+                  <td class="date-cell">{{ t.dueDate }}</td>
+                  <td>
+                    <span
+                      class="pill-badge"
+                      [ngClass]="{
+                        'badge-pending': t.status === 'Pending',
+                        'badge-progress': t.status === 'In Progress',
+                        'badge-completed': t.status === 'Completed'
+                      }">
+                      {{ t.status }}
+                    </span>
+                  </td>
+                  <td>
+                    <button class="btn-action-view" (click)="viewTask(t)">View</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Quick Actions Card -->
+        <div class="card-panel quick-actions-panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Quick Actions</h2>
+          </div>
+
+          <div class="quick-actions-grid">
+            <!-- Action 1: Process a Claim -->
+            <button class="action-tile tile-blue" (click)="openProcessClaimModal()">
+              <div class="action-icon blue">
+                <i class="fa-solid fa-file-shield"></i>
+              </div>
+              <span class="action-label">Process a Claim</span>
+            </button>
+
+            <!-- Action 2: Search Customer -->
+            <button class="action-tile tile-green" (click)="openSearchCustomerModal()">
+              <div class="action-icon green">
+                <i class="fa-solid fa-user"></i>
+              </div>
+              <span class="action-label">Search Customer</span>
+            </button>
+
+            <!-- Action 3: Update Policy -->
+            <button class="action-tile tile-amber" (click)="openUpdatePolicyModal()">
+              <div class="action-icon amber">
+                <i class="fa-regular fa-file-lines"></i>
+              </div>
+              <span class="action-label">Update Policy</span>
+            </button>
+
+            <!-- Action 4: Send Notification -->
+            <button class="action-tile tile-purple" (click)="openSendNotificationModal()">
+              <div class="action-icon purple">
+                <i class="fa-regular fa-envelope"></i>
+              </div>
+              <span class="action-label">Send Notification</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. BOTTOM ROW: RECENT ACTIVITIES + NEED ASSISTANCE? -->
+      <section class="employee-bottom-grid">
+        <!-- Recent Activities Card -->
+        <div class="card-panel activities-panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Recent Activities</h2>
+            <a class="link-view-all" (click)="openTasksModal()">View All</a>
+          </div>
+
+          <div class="activities-list">
+            <div class="activity-item" *ngFor="let item of recentActivities">
+              <div class="activity-circle" [ngClass]="item.colorClass">
+                <i [class]="item.icon"></i>
+              </div>
+              <div class="activity-info">
+                <div class="activity-text">{{ item.title }}</div>
+                <div class="activity-date">{{ item.timestamp }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Need Assistance? Card -->
+        <div class="card-panel assistance-panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Need Assistance?</h2>
+          </div>
+
+          <div class="assistance-body">
+            <div class="assistance-left">
+              <p class="assistance-sub">Reach out to the admin for any support.</p>
+              <button class="btn-assistance" (click)="openContactAdminModal()">
+                Contact Admin
+              </button>
+            </div>
+
+            <!-- Agent Lady Avatar -->
+            <div class="assistance-art">
+              <svg width="110" height="95" viewBox="0 0 130 110" fill="none">
+                <!-- Aura background -->
+                <circle cx="65" cy="55" r="45" fill="#e0f2fe" opacity="0.7"/>
+                <!-- Headset Agent Woman -->
+                <circle cx="65" cy="42" r="16" fill="#fed7aa"/>
+                <path d="M50 38C50 24 58 20 68 20C78 20 81 26 81 38C81 46 78 49 78 51C74 48 70 48 65 48C60 48 56 48 52 51C52 49 50 46 50 38Z" fill="#1e293b"/>
+                <path d="M48 40C48 27 55 18 65 18C75 18 82 27 82 40" stroke="#334155" stroke-width="3" stroke-linecap="round" fill="none"/>
+                <rect x="46" y="37" width="4" height="10" rx="2" fill="#1e3a8a"/>
+                <rect x="80" y="37" width="4" height="10" rx="2" fill="#1e3a8a"/>
+                <path d="M49 45C49 50 54 52 61 51" stroke="#1e3a8a" stroke-width="2" stroke-linecap="round" fill="none"/>
+                <circle cx="62" cy="51" r="2.5" fill="#2563eb"/>
+                <!-- Blue Agent Shirt -->
+                <path d="M42 66C42 85 38 110 38 110H92C92 110 88 85 88 66C82 62 48 62 42 66Z" fill="#93c5fd"/>
+                <path d="M58 63L65 72L72 63Z" fill="#ffffff"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FOOTER -->
+      <footer class="dash-footer">
+        <span class="footer-copy">&copy; 2026 E-Insurance. All Rights Reserved.</span>
+        <div class="footer-links">
+          <span>Privacy Policy</span> &bull; <span>Terms of Use</span> &bull; <span>Contact Us</span>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <!-- MODALS -->
+  <!-- 1. VIEW TASK DETAILS MODAL -->
+  <div class="modal-backdrop" *ngIf="selectedTaskModal()" (click)="closeModals()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <div class="modal-title-wrap">
+          <i class="fa-solid fa-clipboard-check modal-head-icon"></i>
+          <div>
+            <h3>{{ selectedTaskModal()?.task }}</h3>
+            <span class="modal-sub">Assigned Employee Operational Task</span>
+          </div>
+        </div>
+        <button class="modal-close-btn" (click)="closeModals()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body" *ngIf="selectedTaskModal() as t">
+        <div class="detail-grid">
+          <div class="detail-item"><span class="detail-lbl">Task Description</span><span class="detail-val font-bold">{{ t.task }}</span></div>
+          <div class="detail-item"><span class="detail-lbl">Customer Name</span><span class="detail-val font-bold text-primary">{{ t.customerName }}</span></div>
+          <div class="detail-item"><span class="detail-lbl">Due Date</span><span class="detail-val">{{ t.dueDate }}</span></div>
+          <div class="detail-item"><span class="detail-lbl">Current Status</span><span class="pill-badge" [ngClass]="{'badge-pending': t.status === 'Pending', 'badge-progress': t.status === 'In Progress', 'badge-completed': t.status === 'Completed'}">{{ t.status }}</span></div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-secondary" (click)="closeModals()">Close</button>
+        <button class="btn btn-success" (click)="markTaskDone(selectedTaskModal())">Mark as Completed</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. PROCESS CLAIM MODAL -->
+  <div class="modal-backdrop" *ngIf="showProcessClaimModal()" (click)="closeModals()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <div class="modal-title-wrap">
+          <i class="fa-solid fa-shield-virus modal-head-icon text-green"></i>
+          <div><h3>Underwrite & Process Claim</h3><span class="modal-sub">Review documents and approve settlement</span></div>
+        </div>
+        <button class="modal-close-btn" (click)="closeModals()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row"><label class="form-label">Customer</label><input type="text" class="form-control" value="Priya Verma" readonly /></div>
+        <div class="form-row"><label class="form-label">Claim Type</label><input type="text" class="form-control" value="Health Hospitalization (Max Healthcare)" readonly /></div>
+        <div class="form-row"><label class="form-label">Audited Settlement (₹)</label><input type="number" class="form-control" value="28000" /></div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-secondary" (click)="closeModals()">Cancel</button>
+        <button class="btn btn-primary" (click)="approveClaimSuccess()">Approve for Disbursement</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. CONTACT ADMIN MODAL -->
+  <div class="modal-backdrop" *ngIf="showContactAdminModal()" (click)="closeModals()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <div class="modal-title-wrap">
+          <i class="fa-solid fa-headset modal-head-icon text-primary"></i>
+          <div><h3>Contact System Administrator</h3><span class="modal-sub">Escalate ticket or request system permissions</span></div>
+        </div>
+        <button class="modal-close-btn" (click)="closeModals()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row"><label class="form-label">Escalation Topic</label><select class="form-control"><option>Policy Approval Exemption</option><option>Database Verification Sync</option><option>System Issue</option></select></div>
+        <div class="form-row"><label class="form-label">Message Details</label><textarea class="form-control" rows="3" placeholder="Describe the request..."></textarea></div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-secondary" (click)="closeModals()">Cancel</button>
+        <button class="btn btn-primary" (click)="sendAdminMessage()">Submit to Admin</button>
+      </div>
+    </div>
+  </div>
+</div>

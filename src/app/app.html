@@ -1,0 +1,16 @@
+<div class="app-shell" [class.no-outer-nav]="isDashboardView()">
+  <app-navbar *ngIf="!isDashboardView()"></app-navbar>
+
+  <main class="main-content" [class.flush]="isDashboardView()">
+    <router-outlet></router-outlet>
+  </main>
+
+  <footer class="app-footer" *ngIf="!isDashboardView()">
+    <div class="container">
+      <div class="footer-center">
+        <i class="fa-solid fa-shield-halved"></i>
+        <span>&copy; 2026 E-Insurance. All rights reserved.</span>
+      </div>
+    </div>
+  </footer>
+</div>

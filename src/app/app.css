@@ -1,0 +1,43 @@
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f8fafc;
+}
+
+.main-content {
+  flex: 1;
+}
+
+.main-content.flush {
+  padding: 0;
+  margin: 0;
+  max-width: 100%;
+}
+
+.app-shell.no-outer-nav {
+  background-color: #f8fafc;
+}
+
+.app-footer {
+  background: #2563eb;
+  padding: 1.1rem 0;
+  margin-top: 2.5rem;
+  box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.footer-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+.footer-center i {
+  color: #ffffff;
+  font-size: 1rem;
+}
